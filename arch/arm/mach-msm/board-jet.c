@@ -318,9 +318,9 @@ void jet_lcd_id_power(int pull)
 #ifdef CONFIG_MSM_IOMMU
 #define MSM_PMEM_SIZE 0x00000000 /* 0 Mbytes */
 #else
-#define MSM_PMEM_SIZE 0x4000000 /* 64 Mbytes */
+#define MSM_PMEM_SIZE 0x2000000 /* 32 Mbytes */
 #endif
-#define MSM_LIQUID_PMEM_SIZE 0x4000000 /* 64 Mbytes */
+#define MSM_LIQUID_PMEM_SIZE 0x2000000 /* 32 Mbytes */
 
 #ifdef CONFIG_MSM_MULTIMEDIA_USE_ION
 #define MSM_PMEM_KERNEL_EBI1_SIZE  0x280000
