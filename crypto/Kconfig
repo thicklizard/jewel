@@ -311,6 +311,7 @@ config CRYPTO_CRC32C_INTEL
 	tristate "CRC32c INTEL hardware acceleration"
 	depends on X86
 	select CRYPTO_HASH
+	select CRC32
 	help
 	  In Intel processor with SSE4.2 supported, the processor will
 	  support CRC32C implementation using hardware accelerated CRC32
