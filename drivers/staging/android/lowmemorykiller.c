@@ -34,6 +34,7 @@
 #include <linux/mm.h>
 #include <linux/oom.h>
 #include <linux/sched.h>
+#include <linux/rcupdate.h>
 #include <linux/notifier.h>
 #include <linux/memory.h>
 #include <linux/memory_hotplug.h>
@@ -193,7 +194,7 @@ static int lmk_hotplug_callback(struct notifier_block *self,
 
 static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 {
-	struct task_struct *p;
+	struct task_struct *tsk;
 	struct task_struct *selected = NULL;
 	int rem = 0;
 	int tasksize;
@@ -277,16 +278,18 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 	}
 	selected_oom_adj = min_adj;
 
-	read_lock(&tasklist_lock);
-	for_each_process(p) {
-		struct mm_struct *mm;
+	rcu_read_lock();
+	for_each_process(tsk) {
+		struct task_struct *p;
 		struct signal_struct *sig;
 		int oom_adj;
 
-		task_lock(p);
-		mm = p->mm;
+		p = find_lock_task_mm(tsk);
+		 if (!p)
+			continue;
+
 		sig = p->signal;
-		if (!mm || !sig) {
+		if (!sig) {
 			task_unlock(p);
 			continue;
 		}
@@ -296,7 +299,7 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 			task_unlock(p);
 			continue;
 		}
-		tasksize = get_mm_rss(mm);
+		tasksize = get_mm_rss(p->mm);
 		task_unlock(p);
 		if (tasksize <= 0)
 			continue;
@@ -335,12 +338,12 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 			show_meminfo();
 			dump_tasks();
 		}
-		force_sig(SIGKILL, selected);
+		send_sig(SIGKILL, selected, 0);
 		rem -= selected_tasksize;
 	}
 	lowmem_print(4, "lowmem_shrink %lu, %x, return %d\n",
 		     sc->nr_to_scan, sc->gfp_mask, rem);
-	read_unlock(&tasklist_lock);
+	rcu_read_unlock();
 	return rem;
 }
 
