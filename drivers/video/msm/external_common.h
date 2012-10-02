@@ -10,6 +10,8 @@
  * GNU General Public License for more details.
  *
  */
+#pragma GCC diagnostic ignored "-Warray-bounds"
+
 #ifndef __EXTERNAL_COMMON_H__
 #define __EXTERNAL_COMMON_H__
 

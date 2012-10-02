@@ -185,6 +185,9 @@ static void set_acpuclk_L2_freq_foot_print(unsigned khz)
 
 
 /* HTC: Custom max frequency. */
+#ifdef CONFIG_ACPU_CUSTOM_FREQ_SUPPORT
+static int acpu_max_freq = CONFIG_ACPU_MAX_FREQ;
+#endif
 
 enum scalables {
 	CPU0 = 0,
@@ -1299,6 +1302,75 @@ out:
 	return rc;
 }
 
+ssize_t acpuclk_get_vdd_levels_str(char *buf, int isApp) {
+
+int i, len = 0;
+
+if (buf) {
+mutex_lock(&driver_lock);
+
+if (isApp == 0)
+{
+for (i = 0; acpu_freq_tbl[i+1].speed.khz; i++)
+len += sprintf(buf + len, "%8u: %8d\n", acpu_freq_tbl[i+1].speed.khz, acpu_freq_tbl[i+1].vdd_core );
+}
+else
+{
+for (i = isApp-1; i >= 0; i--)
+len += sprintf(buf + len, "%dmhz: %d mV\n", acpu_freq_tbl[i+1].speed.khz/1000,acpu_freq_tbl[i+1].vdd_core/1000);
+}
+mutex_unlock(&driver_lock);
+
+}
+return len;
+}
+
+void acpuclk_set_vdd(unsigned int khz, int vdd_uv) {
+
+int i;
+unsigned int new_vdd_uv;
+
+mutex_lock(&driver_lock);
+
+for (i = 0; acpu_freq_tbl[i+1].speed.khz; i++) {
+if (khz == 0)
+new_vdd_uv = min(max((acpu_freq_tbl[i+1].vdd_core + vdd_uv), (unsigned int)MIN_VDD_SC), (unsigned int)MAX_VDD_SC);
+else if ( acpu_freq_tbl[i+1].speed.khz == khz)
+new_vdd_uv = min(max((unsigned int)vdd_uv, (unsigned int)MIN_VDD_SC), (unsigned int)MAX_VDD_SC);
+else
+continue;
+
+acpu_freq_tbl[i+1].vdd_core = new_vdd_uv;
+}
+
+mutex_unlock(&driver_lock);
+}
+
+void acpuclk_UV_mV_table(int cnt, int vdd_uv[]) {
+
+int i;
+int j=0;
+mutex_lock(&driver_lock);
+
+if (vdd_uv[0] < vdd_uv[cnt-1])
+{
+for (i = 0; i < cnt; i++) {
+if ((vdd_uv[i]*1000) >= MIN_VDD_SC && (vdd_uv[i]*1000) <= MAX_VDD_SC)
+acpu_freq_tbl[i+1].vdd_core = vdd_uv[i]*1000;
+}
+}
+else
+{
+j = cnt-1;
+for (i = 0; i < cnt; i++) {
+if ((vdd_uv[j]*1000) >= MIN_VDD_SC && (vdd_uv[j]*1000) <= MAX_VDD_SC)
+acpu_freq_tbl[i+1].vdd_core = vdd_uv[j]*1000;
+j--;
+}
+}
+mutex_unlock(&driver_lock);
+}
+
 /* Initialize a HFPLL at a given rate and enable it. */
 static void __init hfpll_init(struct scalable *sc, struct core_speed *tgt_s)
 {
@@ -1519,8 +1591,8 @@ static const int krait_needs_vmin(void)
 static void kraitv2_apply_vmin(struct acpu_level *tbl)
 {
 	for (; tbl->speed.khz != 0; tbl++)
-		if (tbl->vdd_core < 1150000)
-			tbl->vdd_core = 1150000;
+		if (tbl->vdd_core < MIN_VDD_SC)
+			tbl->vdd_core = MIN_VDD_SC;
 }
 
 static struct acpu_level * __init select_freq_plan(void)
@@ -1609,21 +1681,6 @@ static struct acpu_level * __init select_freq_plan(void)
 	if (krait_needs_vmin()) {
 		pr_info("Applying min 1.15v fix for Krait Errata 26\n");
 		kraitv2_apply_vmin(acpu_freq_tbl);
-	}
-
-	/* Adjust frequency table according to custom acpu_max_freq */
-	if (acpu_max_freq) {
-		for (l = acpu_freq_tbl; l->speed.khz != 0; l++) {
-			if (l->speed.khz == acpu_max_freq) {
-				/* Custom max freq found in table.
-				 * Mark all subsequent frequencies
-				 * as not supported.
-				 */
-				for (++l; l->speed.khz != 0; l++)
-					l->use_for_scaling = 0;
-				break;
-			}
-		}
 	}
 
 	/* Find the max supported scaling frequency. */

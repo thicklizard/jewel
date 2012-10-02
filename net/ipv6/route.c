@@ -894,7 +894,9 @@ struct dst_entry *ip6_blackhole_route(struct net *net, struct dst_entry *dst_ori
 
 	rt = dst_alloc(&ip6_dst_blackhole_ops, ort->dst.dev, 1, 0, 0);
 	if (rt) {
-		memset(&rt->rt6i_table, 0, sizeof(*rt) - sizeof(struct dst_entry));
+		if (rt != NULL)
+			memset(&rt->rt6i_table, 0,
+				sizeof(*rt) - sizeof(struct dst_entry));
 
 		new = &rt->dst;
 

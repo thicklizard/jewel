@@ -1,3 +1,5 @@
+#pragma GCC diagnostic ignored "-Warray-bounds"
+
 #ifndef _YUSHAN_API_H_
 #define _YUSHAN_API_H_
 
