@@ -40,11 +40,11 @@
  */
 /*added adjustable voltage steps to meet max clock needs dependant on the definition flag in /arc/arm/mach-msm*/
 #ifdef CONFIG_MSM_CPU_MAX_CLK_2DOT1GHZ
-#define FREQ_STEPS	27
+#define FREQ_STEPS	28
 #endif
 
 #ifdef CONFIG_MSM_CPU_MAX_CLK_1DOT89GHZ
-#define FREQ_STEPS	25
+#define FREQ_STEPS	26
 #endif
 
 #ifdef CONFIG_MSM_CPU_MAX_CLK_1DOT7GHZ
@@ -384,7 +384,7 @@ static ssize_t show_##file_name				\
 }
 
 show_one(cpuinfo_min_freq, cpuinfo.min_freq);
-show_one(cpuinfo_max_freq, cpuinfo.max_freq);
+show_one(cpuinfo_max_freq, max);
 show_one(cpuinfo_transition_latency, cpuinfo.transition_latency);
 show_one(scaling_min_freq, min);
 show_one(scaling_max_freq, max);
@@ -664,7 +664,7 @@ ssize_t store_UV_mV_table(struct cpufreq_policy *policy,
 	unsigned int ret = -EINVAL;
 	int u[FREQ_STEPS];
 
-	ret = sscanf(buf, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d", &u[0], &u[1], &u[2], &u[3], &u[4], &u[5], &u[6], &u[7], &u[8], &u[9], &u[10], &u[11], &u[12], &u[13], &u[14], &u[15], &u[16], &u[17], &u[18], &u[19], &u[20], &u[21], &u[22], &u[23], &u[24], &u[25], &u[26], &u[27]);
+	ret = sscanf(buf, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d", &u[0], &u[1], &u[2], &u[3], &u[4], &u[5], &u[6], &u[7], &u[8], &u[9], &u[10], &u[11], &u[12], &u[13], &u[14], &u[15], &u[16], &u[17], &u[18], &u[19], &u[20], &u[21], &u[22], &u[23], &u[24], &u[25], &u[26], &u[27], &u[28]);
 	if(ret != FREQ_STEPS) {
 		return -EINVAL;
 	}
@@ -682,7 +682,7 @@ ssize_t store_UV_mV_table(struct cpufreq_policy *policy,
 	unsigned int ret = -EINVAL;
 	int u[FREQ_STEPS];
 
-	ret = sscanf(buf, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d", &u[0], &u[1], &u[2], &u[3], &u[4], &u[5], &u[6], &u[7], &u[8], &u[9], &u[10], &u[11], &u[12], &u[13], &u[14], &u[15], &u[16], &u[17], &u[18], &u[19], &u[20], &u[21], &u[22], &u[23], &u[24], &u[25]);
+	ret = sscanf(buf, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d", &u[0], &u[1], &u[2], &u[3], &u[4], &u[5], &u[6], &u[7], &u[8], &u[9], &u[10], &u[11], &u[12], &u[13], &u[14], &u[15], &u[16], &u[17], &u[18], &u[19], &u[20], &u[21], &u[22], &u[23], &u[24], &u[25], &u[26]);
 	if(ret != FREQ_STEPS) {
 		return -EINVAL;
 	}
@@ -699,7 +699,7 @@ ssize_t store_UV_mV_table(struct cpufreq_policy *policy,
 	unsigned int ret = -EINVAL;
 	int u[FREQ_STEPS];
 
-	ret = sscanf(buf, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d", &u[0], &u[1], &u[2], &u[3], &u[4], &u[5], &u[6], &u[7], &u[8], &u[9], &u[10], &u[11], &u[12], &u[13], &u[14], &u[15], &u[16], &u[17], &u[18], &u[19], &u[20], &u[21], &u[22], &u[23]);
+	ret = sscanf(buf, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d", &u[0], &u[1], &u[2], &u[3], &u[4], &u[5], &u[6], &u[7], &u[8], &u[9], &u[10], &u[11], &u[12], &u[13], &u[14], &u[15], &u[16], &u[17], &u[18], &u[19], &u[20], &u[21], &u[22], &u[23]);
 	if(ret != FREQ_STEPS) {
 		return -EINVAL;
 	}
@@ -1056,6 +1056,7 @@ static int cpufreq_add_dev(struct sys_device *sys_dev)
 	unsigned long flags;
 	unsigned int j;
 #ifdef CONFIG_HOTPLUG_CPU
+	struct cpufreq_policy *cp;
 	int sibling;
 #endif
 
@@ -1104,10 +1105,14 @@ static int cpufreq_add_dev(struct sys_device *sys_dev)
 	/* Set governor before ->init, so that driver could check it */
 #ifdef CONFIG_HOTPLUG_CPU
 	for_each_online_cpu(sibling) {
-		struct cpufreq_policy *cp = per_cpu(cpufreq_cpu_data, sibling);
+		cp = per_cpu(cpufreq_cpu_data, sibling);
 		if (cp && cp->governor &&
 		    (cpumask_test_cpu(cpu, cp->related_cpus))) {
 			policy->governor = cp->governor;
+			 policy->min = cp->min;
+			policy->max = cp->max;
+			 policy->user_policy.min = cp->user_policy.min;
+			policy->user_policy.max = cp->user_policy.max;
 			found = 1;
 			break;
 		}
@@ -1125,6 +1130,14 @@ static int cpufreq_add_dev(struct sys_device *sys_dev)
 	}
 	policy->user_policy.min = policy->min;
 	policy->user_policy.max = policy->max;
+
+		if (found) {
+		/* Calling the driver can overwrite policy frequencies again */
+		policy->min = cp->min;
+		policy->max = cp->max;
+		policy->user_policy.min = cp->user_policy.min;
+		policy->user_policy.max = cp->user_policy.max;
+	}
 
 	blocking_notifier_call_chain(&cpufreq_policy_notifier_list,
 				     CPUFREQ_START, policy);
