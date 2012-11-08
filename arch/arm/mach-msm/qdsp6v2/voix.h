@@ -1,12 +1,12 @@
-#include "time.h"
-#include "unistd.h"
-#include "fcntl.h"
-#include "limits.h"
-#include "types.h"
-#include "stat.h"
-#include "ioctl.h"
-#include "time.h"
-#include "errno.h"
+#include <time.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <limits.h>
+#include <types.h>
+#include <stat.h>
+#include <ioctl.h>
+#include <time.h>
+#include <errno.h>
 
 #ifdef USING_LAME
 #include "lame/lame.h"
@@ -83,6 +83,17 @@ AUDIO_GET_VOICE_STATE -- Ð Ñ˜Ð Ñ•Ð â„– Ð Ð…Ð Ñ•Ð Ð†Ð¡
 #else
 #define log_dbg(...)
 #endif
+
+
+/* Functions exported by voix_msm7k.c and voix_msm8k.c */
+extern int start_record_msm7k(JNIEnv* env, jobject obj, jstring jfolder, jstring jfile, jint codec, jint boost_up, jint boost_dn);
+extern int start_record_msm8k(JNIEnv* env, jobject obj, jstring jfolder, jstring jfile, jint codec);
+
+extern void stop_record_msm8k(JNIEnv* env, jobject obj, jint context);
+extern void stop_record_msm7k(JNIEnv* env, jobject obj, jint context);
+
+extern void kill_record_msm7k(JNIEnv* env, jobject obj, jint context);
+extern void kill_record_msm8k(JNIEnv* env, jobject obj, jint context);
 
 
 /* Global variables from voix_main.c */

@@ -125,6 +125,12 @@ config CPU_FREQ_DEFAULT_GOV_BADASS
  	help
  	  Use the CPUFreq governor 'smoothass' as default.
 
+config CPU_FREQ_DEFAULT_GOV_ASSWAX
+	bool "asswax"
+	select CPU_FREQ_GOV_ASSWAX
+	help
+	Use as default governor
+
 config CPU_FREQ_DEFAULT_GOV_LAGFREE
         bool "lagfree"
         select CPU_FREQ_GOV_LAGFREE
@@ -426,6 +432,11 @@ config CPU_FREQ_GOV_BADASS_3_PHASE_FREQ
 	depends on CPU_FREQ_GOV_BADASS_2_PHASE
 	depends on CPU_FREQ_GOV_BADASS_3_PHASE
 
+config CPU_FREQ_GOV_ASSWAX
+	tristate "'asswax' cpufreq governor"
+	depends on CPU_FREQ
+	help
+	Use as default governors
 
 config CPU_FREQ_GOV_INTERACTIVE
 	tristate "'interactive' cpufreq policy governor"

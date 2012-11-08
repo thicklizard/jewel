@@ -318,9 +318,8 @@ void jet_lcd_id_power(int pull)
 #ifdef CONFIG_MSM_IOMMU
 #define MSM_PMEM_SIZE 0x00000000 /* 0 Mbytes */
 #else
-#define MSM_PMEM_SIZE 0x2000000 /* 32 Mbytes */
+#define MSM_PMEM_SIZE 0x3200000 /* 50 Mbytes */
 #endif
-#define MSM_LIQUID_PMEM_SIZE 0x2000000 /* 32 Mbytes */
 
 #ifdef CONFIG_MSM_MULTIMEDIA_USE_ION
 #define MSM_PMEM_KERNEL_EBI1_SIZE  0x280000
@@ -339,7 +338,7 @@ void jet_lcd_id_power(int pull)
 #define MSM_ION_MM_SIZE		MSM_PMEM_ADSP_SIZE - MSM_PMEM_ADSP2_SIZE
 #endif
 #define MSM_ION_ROTATOR_SIZE	MSM_PMEM_ADSP2_SIZE
-#define MSM_ION_QSECOM_SIZE	0x100000 /* (1MB) */
+#define MSM_ION_QSECOM_SIZE	0x300000 /* (3MB) */
 #define MSM_ION_MFC_SIZE	0x100000  //SZ_8K
 #ifdef CONFIG_MSM_IOMMU
 #define MSM_ION_HEAP_NUM	7
@@ -4405,7 +4404,7 @@ static int phy_init_seq_v3_2_1[] = { 0x5f, 0x81, 0x3c, 0x82, -1};
 
 static struct msm_otg_platform_data msm_otg_pdata = {
 	.phy_init_seq		= phy_init_seq_v3,
-	.mode			= USB_PERIPHERAL,
+	.mode			= USB_OTG,
 	.otg_control		= OTG_PMIC_CONTROL,
 	.phy_type		= SNPS_28NM_INTEGRATED_PHY,
 	.vbus_power		= msm_hsusb_vbus_power,

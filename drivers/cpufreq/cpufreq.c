@@ -48,7 +48,7 @@
 #endif
 
 #ifdef CONFIG_MSM_CPU_MAX_CLK_1DOT7GHZ
-#define FREQ_STEPS	23
+#define FREQ_STEPS	24
 #endif
 
 #ifdef CONFIG_MSM_CPU_MAX_CLK_1DOT5GHZ
@@ -699,7 +699,7 @@ ssize_t store_UV_mV_table(struct cpufreq_policy *policy,
 	unsigned int ret = -EINVAL;
 	int u[FREQ_STEPS];
 
-	ret = sscanf(buf, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d", &u[0], &u[1], &u[2], &u[3], &u[4], &u[5], &u[6], &u[7], &u[8], &u[9], &u[10], &u[11], &u[12], &u[13], &u[14], &u[15], &u[16], &u[17], &u[18], &u[19], &u[20], &u[21], &u[22], &u[23]);
+	ret = sscanf(buf, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d", &u[0], &u[1], &u[2], &u[3], &u[4], &u[5], &u[6], &u[7], &u[8], &u[9], &u[10], &u[11], &u[12], &u[13], &u[14], &u[15], &u[16], &u[17], &u[18], &u[19], &u[20], &u[21], &u[22], &u[23]);
 	if(ret != FREQ_STEPS) {
 		return -EINVAL;
 	}
